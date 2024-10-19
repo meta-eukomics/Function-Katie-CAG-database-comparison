@@ -7,7 +7,8 @@ R_plots/CAG_MAD_protein_counts_absolute_barplot.pdf is a stacked barplot of the 
 
 R_plots/CAG_MAD_protein_counts_relative_barplot_v2.pdf is a relative abundance barplot of each database category divided by the total number of Eggnog annotated reads for each assembly. 
 
-#Dataframe headings
+Dataframe headings
+
  "Sample" = sample IDs for CAGs and MAD
  "Total_contigs" = number of proteins annotated by Eggnog
  "PFAMs" = number of proteins annotated in Eggnog by PFAM
