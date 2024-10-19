@@ -1,0 +1,394 @@
+---
+title: "Roche_intercal_day1"
+output: html_document
+date: "2024-10-11"
+---
+
+#This R script includes Katie Roche's Day 1 exploration for the OCB RNA Intercalibration effort. The first look will be a comparison of databases from the eggnog output of the consistently assembled CAG samples. 
+#CAG are the individually assembled and annotated samples. MAD will be the merged and clustered overarching file but it isn't done running yet (10/18 morning)
+
+#Library
+```{r}
+install.packages("dplyr")
+install.packages("tidyverse")
+install.packages("tidyr")
+install.packages("ggplot2")
+
+#Getting ggplot2 to install
+install.packages("devtools")
+devtools::install_version("Matrix", version = "1.6-0")
+devtools::install_version("MASS", version = "7.3-58", repos = "http://cran.us.r-project.org")
+devtools::install_version("mgcv", version = "1.8-39", repos = "http://cran.us.r-project.org")
+install.packages("ggplot2")
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+```
+
+#Load eggnog files
+```{r}
+#Load eggnog annotations
+eggnog_HS032 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS032.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS033 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS033.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS034 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS034.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS035 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS035.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS036 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS036.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS037 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS037.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS038 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS038.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS039 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS039.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS040 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS040.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+#eggnog_HS041 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS041.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS042 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS042.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS043 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS043.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS044 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS044.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS045 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS045.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS046 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS046.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS047 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS047.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS048 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS048.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS049 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS049.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS050 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS050.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS051 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS051.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS052 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS052.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS053 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS053.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS054 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS054.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS055 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS055.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS056 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS056.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS057 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS057.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS058 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS058.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+#eggnog_HS059 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS059.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+eggnog_HS060 <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/19-CAG-emapper/HS060.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+
+#MAD assembly
+eggnog_MAD <- read.table("/work/ocb_2024fall/data/consistent-pipeline/04-compare/MAD.emapper.annotations", sep = "\t", header = FALSE, fill=TRUE)
+
+
+#Rename headers
+#Eggnog header: query  seed_ortholog   evalue  score   eggNOG_OGs      max_annot_lvl   COG_category    Description     Preferred_name  GOs     EC      KEGG_ko KEGG_Pathway    KEGG_Module     KEGG_Reaction   KEGG_rclass     BRITE   KEGG_TC CAZy    BiGG_Reaction   PFAMs
+new.colname= c("Name", "seed_ortholog", "evalue", "score", "eggNOG_OGs", "max_annot_lvl", "COG_category", "Description", "Preferred_name", "GOs", "EC", "KEGG_ko", "KEGG_Pathway", "KEGG_Module", "KEGG_Reaction", "KEGG_rclass", "BRITE", "KEGG_TC", "CAZy", "BiGG_Reaction", "PFAMs")
+
+#Change column names and change all "-" to "NA" in eggnog output
+names(eggnog_HS032) <- new.colname
+eggnog_HS032 <- eggnog_HS032 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS033) <- new.colname
+eggnog_HS033 <- eggnog_HS033 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS034) <- new.colname
+eggnog_HS034 <- eggnog_HS034 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS035) <- new.colname
+eggnog_HS035 <- eggnog_HS035 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS036) <- new.colname
+eggnog_HS036 <- eggnog_HS036 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS037) <- new.colname
+eggnog_HS037 <- eggnog_HS037 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS038) <- new.colname
+eggnog_HS038 <- eggnog_HS038 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS039) <- new.colname
+eggnog_HS039 <- eggnog_HS039 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS040) <- new.colname
+eggnog_HS040 <- eggnog_HS040 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+#names(eggnog_HS041) <- new.colname
+#eggnog_HS041 <- eggnog_HS041 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS042) <- new.colname
+eggnog_HS042 <- eggnog_HS042 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS043) <- new.colname
+eggnog_HS043 <- eggnog_HS043 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS044) <- new.colname
+eggnog_HS044 <- eggnog_HS044 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS045) <- new.colname
+eggnog_HS045 <- eggnog_HS045 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS046) <- new.colname
+eggnog_HS046 <- eggnog_HS046 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS047) <- new.colname
+eggnog_HS047 <- eggnog_HS047 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS048) <- new.colname
+eggnog_HS048 <- eggnog_HS048 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS049) <- new.colname
+eggnog_HS049 <- eggnog_HS049 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS050) <- new.colname
+eggnog_HS050 <- eggnog_HS050 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS051) <- new.colname
+eggnog_HS051 <- eggnog_HS051 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS052) <- new.colname
+eggnog_HS052 <- eggnog_HS052 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS053) <- new.colname
+eggnog_HS053 <- eggnog_HS053 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS054) <- new.colname
+eggnog_HS054 <- eggnog_HS054 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS055) <- new.colname
+eggnog_HS055 <- eggnog_HS055 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS056) <- new.colname
+eggnog_HS056 <- eggnog_HS056 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS057) <- new.colname
+eggnog_HS057 <- eggnog_HS057 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS058) <- new.colname
+eggnog_HS058 <- eggnog_HS058 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+#names(eggnog_HS059) <- new.colname
+#eggnog_HS059 <- eggnog_HS059 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+names(eggnog_HS060) <- new.colname
+eggnog_HS060 <- eggnog_HS060 %>% mutate_all(~ifelse(. == "-", NA, .))
+
+#MAD assembly
+names(eggnog_MAD) <- new.colname
+eggnog_MAD <- eggnog_MAD %>% mutate_all(~ifelse(. == "-", NA, .))
+
+#NOTE: eggnog uses E-value threshold of 10e-3, keep this instead of imposing 10e-5 threshold
+
+#NOTE: Eggnog mapper outputs from HS041 and HS059 need to be incorporated once they are run
+
+#View(head(eggnog_HS032, 100))
+
+```
+
+#Calculate number of annotated proteins by database for each sample
+```{r}
+# Define a function to calculate the counts and create a dataframe for a sample
+create_counts_df <- function(sample_name) {
+  # Get the total number of rows (Total contigs)
+  total_contigs <- nrow(sample_name)
+  
+  # Count for each individual column and pairwise combinations
+  PFAM_count <- sum(!is.na(sample_name$PFAMs))
+  KEGG_ko_count <- sum(!is.na(sample_name$KEGG_ko))
+  GOs_count <- sum(!is.na(sample_name$GOs))
+  
+  PFAM_KEGG_count <- sum(!is.na(sample_name$PFAMs) & !is.na(sample_name$KEGG_ko))
+  PFAM_GOs_count <- sum(!is.na(sample_name$PFAMs) & !is.na(sample_name$GOs))
+  KEGG_GOs_count <- sum(!is.na(sample_name$KEGG_ko) & !is.na(sample_name$GOs))
+  
+  PFAMS_KEGG_ko_GOs_count <- sum(!is.na(sample_name$KEGG_ko) & !is.na(sample_name$GOs) & !is.na(sample_name$PFAMs))
+  
+  # New counts for when only one column has a value
+  PFAM_only <- sum(!is.na(sample_name$PFAMs) & is.na(sample_name$KEGG_ko) & is.na(sample_name$GOs))
+  KEGG_only <- sum(!is.na(sample_name$KEGG_ko) & is.na(sample_name$PFAMs) & is.na(sample_name$GOs))
+  GO_only <- sum(!is.na(sample_name$GOs) & is.na(sample_name$PFAMs) & is.na(sample_name$KEGG_ko))
+  
+  PFAM_KEGG_only <- sum(!is.na(sample_name$PFAMs) & !is.na(sample_name$KEGG_ko) & is.na(sample_name$GOs))
+  PFAM_GOs_only <- sum(!is.na(sample_name$PFAMs) & !is.na(sample_name$GOs) & is.na(sample_name$KEGG_ko))
+  KEGG_GOs_only <- sum(!is.na(sample_name$KEGG_ko) & !is.na(sample_name$GOs) & is.na(sample_name$PFAMs))
+  
+  # Create a new dataframe with the results
+  result_df <- data.frame(
+    Metric = c("Total_contigs", "PFAMs", "KEGG_ko", "GOs", 
+               "PFAMs_KEGG_ko", "PFAMs_GOs", "KEGG_ko_GOs", "PFAMS_KEGG_ko_GOs",
+               "PFAM_only", "KEGG_only", "GO_only", 
+               "PFAM_KEGG_only", "PFAM_GOs_only", "KEGG_GOs_only"),
+    Count = c(total_contigs, PFAM_count, KEGG_ko_count, GOs_count, 
+              PFAM_KEGG_count, PFAM_GOs_count, KEGG_GOs_count, PFAMS_KEGG_ko_GOs_count,
+              PFAM_only, KEGG_only, GO_only, 
+              PFAM_KEGG_only, PFAM_GOs_only, KEGG_GOs_only)
+  )
+  
+  return(result_df)
+}
+
+# Apply the function to each sample and create separate dataframes
+HS032_df <- create_counts_df(eggnog_HS032)
+HS033_df <- create_counts_df(eggnog_HS033)
+HS034_df <- create_counts_df(eggnog_HS034)
+HS035_df <- create_counts_df(eggnog_HS035)
+HS036_df <- create_counts_df(eggnog_HS036)
+HS037_df <- create_counts_df(eggnog_HS037)
+HS038_df <- create_counts_df(eggnog_HS038)
+HS039_df <- create_counts_df(eggnog_HS039)
+HS040_df <- create_counts_df(eggnog_HS040)
+#HS041_df <- create_counts_df(eggnog_HS041)
+HS042_df <- create_counts_df(eggnog_HS042)
+HS043_df <- create_counts_df(eggnog_HS043)
+HS044_df <- create_counts_df(eggnog_HS044)
+HS045_df <- create_counts_df(eggnog_HS045)
+HS046_df <- create_counts_df(eggnog_HS046)
+HS047_df <- create_counts_df(eggnog_HS047)
+HS048_df <- create_counts_df(eggnog_HS048)
+HS049_df <- create_counts_df(eggnog_HS049)
+HS050_df <- create_counts_df(eggnog_HS050)
+HS051_df <- create_counts_df(eggnog_HS051)
+HS052_df <- create_counts_df(eggnog_HS052)
+HS053_df <- create_counts_df(eggnog_HS053)
+HS054_df <- create_counts_df(eggnog_HS054)
+HS055_df <- create_counts_df(eggnog_HS055)
+HS056_df <- create_counts_df(eggnog_HS056)
+HS057_df <- create_counts_df(eggnog_HS057)
+HS058_df <- create_counts_df(eggnog_HS058)
+#HS059_df <- create_counts_df(eggnog_HS059)
+HS060_df <- create_counts_df(eggnog_HS060)
+
+MAD_df <- create_counts_df(eggnog_MAD)
+```
+
+#Combine all annotated protein counts dataframes into one
+```{r}
+# Combine all HS#_df dataframes into one dataframe with row names as column headings
+
+# List of all dataframes, excluding HS041 and HS059 -- NEED TO ADD THESE LATER
+df_list <- list(HS032_df, HS033_df, HS034_df, HS035_df, HS036_df, HS037_df, HS038_df, HS039_df, 
+                HS040_df, HS042_df, HS043_df, HS044_df, HS045_df, HS046_df, HS047_df, 
+                HS048_df, HS049_df, HS050_df, HS051_df, HS052_df, HS053_df, HS054_df, HS055_df, 
+                HS056_df, HS057_df, HS058_df, HS060_df, MAD_df)
+
+# Extract the 'Count' column from each dataframe and combine them
+combined_df <- do.call(cbind, lapply(df_list, function(df) df$Count))
+
+# Transpose the dataframe so that each metric becomes a column and each sample is a row
+combined_df <- t(combined_df)
+
+# Convert the transposed dataframe to a data frame
+combined_df <- as.data.frame(combined_df)
+
+# Assign column names from the 'Metric' column of the first dataframe (HS032_df)
+colnames(combined_df) <- HS032_df$Metric
+
+# Create a new column 'Sample' with sample names (excluding HS041 and HS059)
+combined_df$Sample <- c("HS032", "HS033", "HS034", "HS035", "HS036", "HS037", "HS038", "HS039", 
+                         "HS040", "HS042", "HS043", "HS044", "HS045", "HS046", "HS047", 
+                         "HS048", "HS049","HS050", "HS051", "HS052", "HS053", "HS054", "HS055", 
+                         "HS056", "HS057", "HS058", "HS060", "MAD")
+
+# Move 'Sample' column to the front
+combined_df <- combined_df[, c("Sample", colnames(combined_df)[-which(colnames(combined_df) == "Sample")])]
+
+# View the combined dataframe
+combined_df
+
+#write.csv(combined_df, file = "/work/ocb_2024fall/projects/function/Roche/CAG_database_contig_counts.csv")
+#In this file, PFAMs is the total contigs with a PFAM annotation while PFAM_only is the total contigs with a PFAM annotation but not KEGG or GO. All other columns follow this pattern
+
+```
+
+#Add total number of predicted proteins and calculate unannotated
+```{r}
+#In command line, use grep to count the > in each .pep file
+#Example: grep -c '>' HS060_CAG.fasta.transdecoder.pep #1280145
+
+#Skipping samples 41 (150872) and 59 (1384989) because I don't have the emapper files for them. Add them later.
+#MAD is 15851149
+
+total_pep_counts = c(153322,157111,113837,103248,100264,7624,137217,351027,70921,119101,36596,488623,172241,225876,123699,159230,56061,150412,44063,770616,1178412,497183,642121,325879,327675,6590308,1280145, 15851149)
+
+#Add as column to combined_df
+contig_counts <- combined_df 
+contig_counts$total_pep_counts <- total_pep_counts
+
+#Save
+#write.csv(contig_counts, file = "/work/ocb_2024fall/projects/function/Roche/CAG_database_contig_counts_v2.csv")
+#contig_counts = read.csv("/work/ocb_2024fall/projects/function/Roche/CAG_database_contig_counts_v2.csv")
+
+#organize dataframe
+new.names = c("Sample", "Eggnog_total_annotations")
+
+#Add column for # proteins annotated in eggnog mapper but not by Pfam/KEGG/GO
+contig_counts$not_Pfam_KEGG_GO = contig_counts$Total_contigs - (contig_counts$PFAM_only + contig_counts$KEGG_only + contig_counts$GO_only + contig_counts$PFAM_KEGG_only + contig_counts$PFAM_GOs_only + contig_counts$KEGG_GOs_only + contig_counts$PFAMS_KEGG_ko_GOs)
+
+```
+
+#Calculate percentages
+```{r}
+#Make column for unannotated contigs
+contig_counts$unannotated = contig_counts$total_pep_counts - contig_counts$Total_contigs
+
+#Divide by Total_contigs (removes unannotated from equation)
+# Assuming contig_counts has a column named Total_contigs
+columns_to_divide <- c("PFAMS_KEGG_ko_GOs", "PFAM_only", "KEGG_only", 
+                        "GO_only", "PFAM_KEGG_only", "PFAM_GOs_only", 
+                        "KEGG_GOs_only", "not_Pfam_KEGG_GO")
+
+# Loop through the specified columns and create new columns with the percentage
+for (col in columns_to_divide) {
+  new_col_name <- paste0(col, "_percent")  # Create new column name
+  contig_counts[[new_col_name]] <- contig_counts[[col]] / contig_counts$Total_contigs * 100  # Calculate percentage
+}
+
+#Save dataframe
+write.csv(contig_counts, file = "/work/ocb_2024fall/projects/function/Roche/CAG_MAD_annotated_protein_counts.csv")
+```
+
+#Plot the results - absolute protein counts
+```{r}
+# First, reshape the data to long format
+contig_counts_long <- contig_counts %>%
+  pivot_longer(cols = c("PFAMS_KEGG_ko_GOs", "PFAM_only", "KEGG_only", 
+                         "GO_only", "PFAM_KEGG_only", "PFAM_GOs_only", 
+                         "KEGG_GOs_only", "unannotated"),
+               names_to = "Category", values_to = "# of contigs")
+
+# Create the stacked barplot
+ggplot(contig_counts_long, aes(x = Sample, y = `# of contigs`, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Sample",
+       y = "# of Predicted Proteins") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggsave(filename = "/work/ocb_2024fall/projects/function/Roche/R_plots/CAG_MAD_protein_counts_absolute_barplot.pdf", 
+       device = "pdf", 
+       width = 8,       # Width in inches
+       height = 6,      # Height in inches
+       dpi = 300)
+```
+
+#Plot - relative abundance of database categories within proteins annotated by eggnog
+```{r}
+# Reshape the data to long format
+contig_counts_long <- contig_counts %>%
+  pivot_longer(cols = contains("_percent"),  # Select all columns that end with _percent
+               names_to = "Category", 
+               values_to = "Relative_Abundance")
+
+# Create the relative abundance barplot
+ggplot(contig_counts_long, aes(x = Sample, y = Relative_Abundance, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Sample",
+       y = "Relative Abundance (%)") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") + # Adjust the color palette as needed
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) # Rotate x-axis labels
+
+ggsave(filename = "/work/ocb_2024fall/projects/function/Roche/R_plots/CAG_MAD_protein_counts_relative_barplot_v2.pdf", 
+       device = "pdf", 
+       width = 8,       # Width in inches
+       height = 6,      # Height in inches
+       dpi = 300)
+```
+
+#Explanation of dataframe headings
+```{r}
+#Total_contigs = the total number of predicted protein annotations in Eggnog
+#PFAM, KEGG_ko, and GOs = total number of predicted protein annotations in Eggnog for each database (but not only assigned to each of these databases)
+#PFAMs_KEGG_ko, PFAMs_GOs, KEGG_ko_GOs = pairwise comparisons of total protein annotations (but not only assigned to these databases)
+#Anything with "_only" suffix = number of annotated proteins is specific to that one database or subset of databases
+#Anything with "_percent" = the number of annotated proteins for a specific database(s) in eggnog divided by the total number of annotated proteins in eggnog
+#unannotated = total_pep_counts from the .pep transdecoder files minus the number of annotated proteins in eggnog
+```
+
+
+
+
